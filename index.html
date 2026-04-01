@@ -412,7 +412,7 @@ function renderCards() {
     card.innerHTML = `
       <div class="av">${EMOJIS[i % EMOJIS.length]}</div>
       <div class="fn">${f.name || 'Friend ' + key}</div>
-     
+      <div class="fk">#${key}</div>`;
     card.addEventListener('click', () => startFlow(key, f));
     grid.appendChild(card);
   });
