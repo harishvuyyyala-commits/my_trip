@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Trip Photos – Batch 1 📸</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Syne:wght@700;800&family=Space+Mono&display=swap" rel="stylesheet"/>
+<style>
+/* ─── RESET & BASE ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:    #0c0a07;
+  --card:  #1a1710;
+  --brd:   #2a2418;
+  --gold:  #f5a623;
+  --goldl: #fdd17a;
+  --cream: #f0e6d0;
+  --dim:   #7a6e5a;
+  --red:   #e84040;
+  --grn:   #48b87a;
+}
+html, body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--cream);
+  font-family: 'Space Mono', monospace;
+  overflow-x: hidden;
+}
+
+/* ─── FILM STRIPS ─── */
+.film {
+  position: fixed; left: 0; right: 0; height: 36px;
+  background: #060504; z-index: 999;
+  display: flex; align-items: center; gap: 4px; padding: 0 4px;
+  overflow: hidden;
+}
+.film.t { top: 0; } .film.b { bottom: 0; }
+.fh { flex-shrink: 0; width: 22px; height: 14px; border-radius: 3px; background: var(--bg); }
+
+/* ─── SCREENS ─── */
+.screen { display: none; min-height: 100vh; padding: 44px 16px 44px; }
+.screen.on { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+
+/* ══════════ LANDING ══════════ */
+.badge {
+  margin-top: 12px; margin-bottom: 20px;
+  border: 1px solid var(--gold); color: var(--gold);
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  padding: 4px 16px; border-radius: 2px; opacity: .8;
+}
+.hero {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(1.8rem, 5.5vw, 3.4rem);
+  font-weight: 800; text-align: center; line-height: 1.1;
+  color: #faf6ee; margin-bottom: 8px;
+}
+.hero em { color: var(--gold); font-style: normal; }
+.tagline { font-family: 'Caveat', cursive; font-size: 1.2rem; color: var(--dim); margin-bottom: 36px; }
+
+/* friend grid */
+.grid {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 12px; max-width: 880px; width: 100%; margin-bottom: 24px;
+}
+.fc {                          /* friend card */
+  background: var(--card); border: 1px solid var(--brd);
+  border-radius: 5px; padding: 18px 18px 13px;
+  cursor: pointer; min-width: 100px; max-width: 130px; flex: 0 0 auto;
+  text-align: center; user-select: none;
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+  animation: popIn .4s both;
+}
+.fc::before {                  /* polaroid strip */
+  content: ''; display: block; width: 44%; height: 3px;
+  background: var(--brd); border-radius: 0 0 2px 2px;
+  margin: -18px auto 14px;
+}
+.fc:hover                    { transform: translateY(-7px) rotate(-1.5deg); border-color: var(--gold); box-shadow: 0 16px 36px rgba(245,166,35,.18); }
+.fc:nth-child(even):hover    { transform: translateY(-7px) rotate( 1.5deg); }
+.av {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), #a05a08);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; margin: 0 auto 9px; position: relative;
+}
+.av::after { content:''; position:absolute; inset:-3px; border-radius:50%; border:1px dashed rgba(245,166,35,.3); }
+.fn { font-family: 'Caveat', cursive; font-size: 1.2rem; font-weight: 700; color: #faf6ee; }
+.fk { font-size: 8px; color: var(--dim); letter-spacing: 1px; margin-top: 3px; }
+
+.lhint { font-family: 'Caveat', cursive; font-size: 1rem; color: var(--dim); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:.45} 50%{opacity:1} }
+
+/* ══════════ EXPERIENCE ══════════ */
+#exp {
+  justify-content: center;
+  position: relative;
+}
+.stage {
+  width: 100%; max-width: 480px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+
+/* ─── PHASE WRAPPERS ─── */
+.ph { display: none; flex-direction: column; align-items: center; width: 100%; }
+.ph.on { display: flex; }
+
+/* ─── LOADING ─── */
+.ph-title {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(1.4rem, 4vw, 2.2rem); color: var(--gold); margin-bottom: 6px;
+  animation: fadeUp .5s both;
+}
+.ph-sub {
+  font-size: .75rem; color: var(--dim); letter-spacing: 1px;
+  margin-bottom: 32px; min-height: 18px;
+  animation: fadeUp .5s .1s both;
+}
+
+/* film reel spinner */
+.reel { width: 110px; height: 110px; margin-bottom: 28px; animation: fadeUp .5s .2s both; }
+.reel svg { animation: spin 1.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.barwrap { width: 240px; height: 4px; background: var(--brd); border-radius: 4px; overflow: hidden; margin-bottom: 10px; animation: fadeUp .5s .3s both; }
+.bar      { height: 100%; background: linear-gradient(90deg, var(--gold), var(--goldl)); width: 0; border-radius: 4px; transition: width .25s ease; }
+.pct      { font-size: 10px; color: var(--dim); letter-spacing: 2px; animation: fadeUp .5s .35s both; }
+
+/* ─── PRANK ─── */
+.pr-icon { font-size: 5.5rem; animation: bounce .55s cubic-bezier(.3,.07,.2,.97); margin-bottom: 12px; }
+.pr-nope { font-size: .78rem; letter-spacing: 3px; color: var(--dim); margin-bottom: 10px; }
+.pr-big  {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(3rem, 11vw, 6rem); line-height: 1;
+  color: var(--gold); margin-bottom: 12px;
+  animation: glitch .5s .15s both;
+}
+.pr-row { font-size: 2rem; letter-spacing: 10px; animation: wobble .6s .3s both; }
+
+/* ─── WAIT ─── */
+.wt-big { font-family: 'Caveat', cursive; font-size: clamp(3rem, 9vw, 5.5rem); color: #faf6ee; animation: fadeUp .6s both; }
+.wt-sub { font-family: 'Caveat', cursive; font-size: 1.4rem; color: var(--dim); margin-top: 14px; animation: fadeUp .6s .5s both; }
+
+/* ─── REVEAL ─── */
+.rv-card {
+  background: var(--card); border: 1px solid var(--brd);
+  border-radius: 8px; padding: 26px; width: 100%; text-align: left;
+  position: relative; overflow: hidden;
+}
+.rv-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--gold),transparent); }
+.rv-label { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; animation: fadeUp .5s .05s both; }
+.rv-title { font-family:'Syne',sans-serif; font-weight:800; font-size:1.45rem; color:#faf6ee; margin-bottom:16px; line-height:1.2; animation:fadeUp .5s .15s both; }
+.rv-gif {
+  width: 100%;
+  max-height: 300px; /* optional limit */
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--brd);
+  margin-bottom: 16px;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeUp .5s .25s both;
+}
+
+.rv-gif img {
+  width: 100%;
+  height: auto; /* important change */
+  max-height: 300px; /* keeps it controlled */
+  object-fit: contain; /* prevents cropping */
+  display: block;
+}
+.rv-row   { display:flex; gap:8px; margin-bottom:9px; animation:fadeUp .5s var(--d,.4s) both; }
+.rv-ico   { flex-shrink:0; font-size:1rem; margin-top:3px; }
+.rv-txt   { font-family:'Caveat',cursive; font-size:1.15rem; color:var(--cream); line-height:1.4; }
+.rv-txt.d { color:var(--dim); font-size:1rem; }
+.rv-div   { height:1px; background:var(--brd); margin:12px 0; animation:fadeUp .5s .68s both; }
+.back-btn {
+  background:none; border:1px solid var(--brd); color:var(--dim);
+  font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px;
+  padding:8px 22px; border-radius:2px; cursor:pointer; margin-top:20px;
+  transition:all .2s; text-transform:uppercase;
+}
+.back-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+/* ─── QUOTE BUTTON ─── */
+#qbtn {
+  display: none;                      /* shown after reveal */
+  position: fixed; right: 0; top: 50%; transform: translateY(-50%);
+  background: var(--gold); border: none; border-radius: 8px 0 0 8px;
+  width: 38px; height: 88px; cursor: pointer; z-index: 800;
+  flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  box-shadow: -4px 0 24px rgba(0,0,0,.55);
+  transition: width .15s, background .2s;
+}
+#qbtn:hover { background: var(--goldl); width: 42px; }
+#qbtn span.qi { font-size: 1.1rem; }
+#qbtn span.ql { font-size: 7px; color: #0c0a07; font-family:'Space Mono',monospace; writing-mode:vertical-lr; letter-spacing:1px; }
+
+/* ══════════ QUOTE FULLSCREEN ══════════ */
+#qscreen {
+  display: none;
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(6,4,2,.94);
+  backdrop-filter: blur(14px);
+  flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px 24px;
+}
+#qscreen.on { display: flex; }
+
+.qs-wrap { max-width: 540px; width: 100%; text-align: center; animation: fadeUp .45s both; }
+.qs-label { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-bottom: 20px; display: block; }
+.qs-mark  { font-family:'Syne',sans-serif; font-size: 7rem; line-height: .55; color: var(--gold); opacity: .25; user-select:none; }
+.qs-text  { font-family:'Caveat',cursive; font-size: clamp(1.7rem,4.5vw,2.5rem); line-height: 1.55; color: #faf6ee; margin: 18px 0 34px; transition: opacity .25s, transform .25s; }
+.qs-btns  { display: flex; gap: 12px; justify-content: center; margin-bottom: 30px; }
+.qs-next {
+  background: var(--gold); border: none; color: #0c0a07;
+  font-family:'Space Mono',monospace; font-size: 10px; letter-spacing: 2px;
+  padding: 11px 26px; border-radius: 2px; cursor: pointer; transition: background .2s;
+}
+.qs-next:hover { background: var(--goldl); }
+.qs-close {
+  background: none; border: 1px solid var(--brd); color: var(--dim);
+  font-family:'Space Mono',monospace; font-size: 10px; letter-spacing: 2px;
+  padding: 11px 26px; border-radius: 2px; cursor: pointer; transition: all .2s;
+}
+.qs-close:hover { border-color: var(--cream); color: var(--cream); }
+.qs-div   { height: 1px; background: var(--brd); margin-bottom: 24px; }
+.qs-sorry { font-family:'Caveat',cursive; font-size: 1.2rem; color: var(--dim); line-height: 1.7; font-style: italic; }
+
+/* ══════════ CONFETTI ══════════ */
+#cbox { position:fixed; inset:0; pointer-events:none; z-index:500; overflow:hidden; }
+.cp   { position:absolute; top:-12px; animation: fall linear forwards; }
+@keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity:0; } }
+
+/* ══════════ KEYFRAMES ══════════ */
+@keyframes fadeUp  { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes popIn   { 0%{opacity:0;transform:scale(.85) translateY(12px)} 100%{opacity:1;transform:scale(1) translateY(0)} }
+@keyframes bounce  { 0%{transform:scale(0) rotate(-20deg);opacity:0} 60%{transform:scale(1.22) rotate(5deg);opacity:1} 100%{transform:scale(1) rotate(0)} }
+@keyframes glitch  { 0%{text-shadow:none} 20%{text-shadow:-5px 0 var(--red),5px 0 var(--grn)} 45%{text-shadow:5px 0 var(--red),-5px 0 var(--grn)} 70%{text-shadow:-3px 0 var(--gold)} 100%{text-shadow:none} }
+@keyframes wobble  { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-9deg)} 75%{transform:rotate(9deg)} }
+
+/* mobile */
+@media(max-width:420px){
+  .fc { min-width:88px; padding:14px 10px 10px; }
+  .fn { font-size:1.05rem; }
+  .rv-card { padding:18px; }
+  .qs-text { font-size:1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="film t" id="ft"></div>
+<div class="film b" id="fb"></div>
+
+<!-- ════════ LANDING ════════ -->
+<div id="land" class="screen on">
+  <div class="badge">📸 Google Photos · Trip 2024</div>
+  <h1 class="hero">Trip Photos<br><em>Batch 1 Uploaded</em> 📸</h1>
+  <p class="tagline">Find your name and tap to open your folder</p>
+  <div class="grid" id="grid"></div>
+  <p class="lhint">👆 tap your name to open your folder</p>
+</div>
+
+<!-- ════════ EXPERIENCE ════════ -->
+<div id="exp" class="screen">
+  <div class="stage">
+
+    <!-- PHASE: Loading -->
+    <div class="ph" id="ph-load">
+      <div class="ph-title" id="ld-name"></div>
+      <div class="ph-sub"   id="ld-status">Initializing…</div>
+      <div class="reel">
+        <svg width="110" height="110" viewBox="0 0 100 100" fill="none">
+          <circle cx="50" cy="50" r="44" stroke="#2a2418" stroke-width="8"/>
+          <circle cx="50" cy="50" r="44" stroke="#f5a623" stroke-width="8"
+                  stroke-dasharray="58 220" stroke-linecap="round"/>
+          <circle cx="50" cy="50" r="18" fill="#1a1710" stroke="#2a2418" stroke-width="4"/>
+          <circle cx="50" cy="50" r="6"  fill="#f5a623"/>
+          <circle cx="50" cy="12" r="5" fill="#2a2418"/>
+          <circle cx="50" cy="88" r="5" fill="#2a2418"/>
+          <circle cx="12" cy="50" r="5" fill="#2a2418"/>
+          <circle cx="88" cy="50" r="5" fill="#2a2418"/>
+          <circle cx="21" cy="21" r="5" fill="#2a2418"/>
+          <circle cx="79" cy="79" r="5" fill="#2a2418"/>
+          <circle cx="79" cy="21" r="5" fill="#2a2418"/>
+          <circle cx="21" cy="79" r="5" fill="#2a2418"/>
+        </svg>
+      </div>
+      <div class="barwrap"><div class="bar" id="bar"></div></div>
+      <div class="pct" id="pct">0%</div>
+    </div>
+
+    <!-- PHASE: Prank -->
+    <div class="ph" id="ph-prank">
+      <div class="pr-icon">🙅</div>
+      <div class="pr-big">APRIL<br>FOOL!</div>
+      <div class="pr-row">😂 🎉 😜 🎊 😏</div>
+    </div>
+
+    <!-- PHASE: Wait -->
+    <div class="ph" id="ph-wait">
+      <div class="wt-big">Wait…</div>
+      <div class="wt-sub">But I did find something ✨</div>
+    </div>
+
+    <!-- PHASE: Reveal -->
+    <div class="ph" id="ph-reveal">
+      <div class="rv-card">
+        
+        <div class="rv-title" id="rv-title"></div>
+        <div class="rv-gif"><img id="rv-gif" src="" alt=""/></div>
+        <div class="rv-row" style="--d:.38s"><span class="rv-ico">💬</span><span class="rv-txt" id="rv-reveal"></span></div>
+        <div class="rv-row" style="--d:.50s"><span class="rv-ico">🎯</span><span class="rv-txt" id="rv-fun"></span></div>
+        <div class="rv-div"></div>
+        <div class="rv-row" style="--d:.64s"><span class="rv-ico">🔮</span><span class="rv-txt d" id="rv-hint"></span></div>
+        <div class="rv-row" style="--d:.78s;margin-top:14px">
+          <span class="rv-ico">💛</span>
+          <span class="rv-txt d">No photos… but this felt accurate 😜<br>Trip wouldn't be the same without you ❤️</span>
+        </div>
+      </div>
+      <button class="back-btn" onclick="goBack()">← Choose another name</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Quote trigger (fixed right edge, shown after reveal) -->
+<button id="qbtn" onclick="openQuote()">
+  <span class="qi">✨</span>
+  <span class="ql">QUOTE</span>
+</button>
+
+<!-- ════════ QUOTE FULLSCREEN ════════ -->
+<div id="qscreen">
+  <div class="qs-wrap">
+    <span class="qs-label">Trip Quote ✨</span>
+    <div class="qs-mark">"</div>
+    <div class="qs-text" id="qs-text"></div>
+    <div class="qs-btns">
+      <button class="qs-next"  onclick="nextQuote()">↺ Next quote</button>
+      <button class="qs-close" onclick="closeQuote()">✕ Close</button>
+    </div>
+    <div class="qs-div"></div>
+    <div class="qs-sorry">
+      😊 Sorry if this hurts a little…<br>
+      It's truly not my main intention.<br>
+      Just love, memories &amp; a lot of respect ❤️
+    </div>
+  </div>
+</div>
+
+<!-- Confetti container -->
+<div id="cbox"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   ALL DATA COMES FROM name.json
+══════════════════════════════════════════ */
+const EMOJIS  = ['🎸','🎨','🌊','🔥','⚡','🌈','🎯','🎭','🎪','💫','🦋','🍀','🎵','🌙','🌺','🦄','🎃'];
+const CCOLORS = ['#f5a623','#e84040','#48b87a','#fdd17a','#faf6ee','#a05a08','#7ecad8','#f4a0b0'];
+
+let DATA    = null;
+let quotes  = [];
+let qIdx    = 0;
+let running = false;   // prevent double-clicks mid-flow
+
+/* ──────────────────────────────
+   BOOT
+────────────────────────────── */
+(function boot() {
+  buildFilm();
+  loadJSON();
+})();
+
+function buildFilm() {
+  ['ft','fb'].forEach(id => {
+    const el = document.getElementById(id);
+    for (let i = 0; i < 70; i++) el.insertAdjacentHTML('beforeend', '<div class="fh"></div>');
+  });
+}
+
+async function loadJSON() {
+  try {
+    const r = await fetch('name.json');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const raw = await r.json();
+    /* support { friends:{}, quotes:[] }  OR flat { "1":{}, "2":{} } */
+    DATA = raw.friends
+      ? raw
+      : { friends: raw, quotes: raw.quotes || [] };
+    delete DATA.friends.quotes; // in case it leaked in
+    renderCards();
+  } catch(e) {
+    document.getElementById('grid').innerHTML =
+      `<div style="border:1px solid #e84040;background:#1a0808;border-radius:6px;padding:24px 28px;text-align:center;max-width:400px">
+         <p style="font-family:Syne,sans-serif;color:#e84040;font-size:1.1rem;margin-bottom:8px">⚠️ name.json not loaded</p>
+         <p style="font-size:.75rem;color:#7a6e5a;line-height:1.7">Put <strong>name.json</strong> in the same folder as this HTML.<br>Error: ${e.message}</p>
+       </div>`;
+    document.querySelector('.lhint').style.display = 'none';
+  }
+}
+
+function renderCards() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  Object.entries(DATA.friends).forEach(([key, f], i) => {
+    const card = document.createElement('div');
+    card.className = 'fc';
+    card.style.animationDelay = (i * 0.05) + 's';
+    card.innerHTML = `
+      <div class="av">${EMOJIS[i % EMOJIS.length]}</div>
+      <div class="fn">${f.name || 'Friend ' + key}</div>
+      <div class="fk">#${key}</div>`;
+    card.addEventListener('click', () => startFlow(key, f));
+    grid.appendChild(card);
+  });
+}
+
+/* ══════════════════════════════════════════
+   FLOW  (setTimeout chain — no async magic)
+══════════════════════════════════════════ */
+function startFlow(key, friend) {
+  if (running) return;
+  running = true;
+
+  /* setup quotes */
+  quotes = (DATA.quotes || []).slice().sort(() => Math.random() - .5);
+  qIdx   = 0;
+
+  /* switch to experience screen */
+  showScreen('exp');
+  document.getElementById('qbtn').style.display = 'none';
+  setPhase(null);
+
+  /* ── Phase 1: Loading ── */
+  setPhase('load');
+  document.getElementById('ld-name').textContent   = (friend.name || 'Friend ' + key) + "'s Folder";
+  document.getElementById('ld-status').textContent = 'Initializing…';
+
+  const msgs = [
+    'Opening ' + (friend.name || 'Friend') + "'s folder…",
+    'Connecting to Google Photos…',
+    'Loading photo metadata…',
+    'Syncing album data…',
+    'Fetching thumbnails…',
+    'Almost there…'
+  ];
+  const barEl = document.getElementById('bar');
+  const pctEl = document.getElementById('pct');
+  const staEl = document.getElementById('ld-status');
+  let prog = 0, mi = 0;
+
+  const tick = setInterval(() => {
+    prog += Math.random() * 3.5 + 0.8;
+    if (prog > 99) prog = 99;
+    barEl.style.width = prog + '%';
+    pctEl.textContent = Math.round(prog) + '%';
+    if (mi < msgs.length - 1 && prog > (mi + 1) * 17) staEl.textContent = msgs[++mi];
+  }, 110);
+
+  /* after 5 s → Prank */
+  setTimeout(() => {
+    clearInterval(tick);
+    barEl.style.width = '100%';
+    pctEl.textContent = '100%';
+
+    setTimeout(() => {
+      setPhase('prank');
+      spawnConfetti();
+
+      /* after 3 s → Wait */
+      setTimeout(() => {
+        setPhase('wait');
+
+        /* after 2 s → Reveal */
+        setTimeout(() => {
+          document.getElementById('rv-title').textContent  = friend.title  || '';
+          document.getElementById('rv-gif').src            = friend.gif    || '';
+          document.getElementById('rv-reveal').textContent = friend.reveal || '';
+          document.getElementById('rv-fun').textContent    = friend.fun    || '';
+          document.getElementById('rv-hint').textContent   = friend.hint   || '';
+          setPhase('reveal');
+          running = false;
+
+          /* show quote button if quotes exist */
+          if (quotes.length) {
+            setTimeout(() => {
+              document.getElementById('qbtn').style.display = 'flex';
+            }, 1000);
+          }
+
+        }, 2000); // wait → reveal
+
+      }, 3000); // prank → wait
+
+    }, 350); // bar fill → prank
+
+  }, 5000); // loading time
+}
+
+/* ══════════════════════════════════════════
+   SCREEN / PHASE HELPERS
+══════════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+
+function setPhase(name) {
+  document.querySelectorAll('.ph').forEach(p => {
+    p.classList.remove('on');
+    /* reset animations so they replay fresh */
+    p.style.display = 'none';
+    void p.offsetHeight;
+    p.style.display = '';
+  });
+  if (!name) return;
+  const el = document.getElementById('ph-' + name);
+  if (el) el.classList.add('on');
+}
+
+function goBack() {
+  running = false;
+  closeQuote();
+  document.getElementById('qbtn').style.display = 'none';
+  document.getElementById('cbox').innerHTML = '';
+  setPhase(null);
+  showScreen('land');
+}
+
+/* ══════════════════════════════════════════
+   QUOTE OVERLAY
+══════════════════════════════════════════ */
+function openQuote() {
+  if (!quotes.length) return;
+  document.getElementById('qs-text').textContent = quotes[qIdx];
+  document.getElementById('qscreen').classList.add('on');
+}
+function closeQuote() {
+  document.getElementById('qscreen').classList.remove('on');
+}
+function nextQuote() {
+  qIdx = (qIdx + 1) % quotes.length;
+  const el = document.getElementById('qs-text');
+  el.style.opacity = '0'; el.style.transform = 'translateY(10px)';
+  setTimeout(() => {
+    el.textContent = quotes[qIdx];
+    el.style.transition = 'opacity .3s, transform .3s';
+    el.style.opacity = '1'; el.style.transform = 'translateY(0)';
+  }, 220);
+}
+
+/* ══════════════════════════════════════════
+   CONFETTI
+══════════════════════════════════════════ */
+function spawnConfetti() {
+  const box = document.getElementById('cbox');
+  box.innerHTML = '';
+  for (let i = 0; i < 110; i++) {
+    const p  = document.createElement('div');
+    p.className = 'cp';
+    const sz = 5 + Math.random() * 9;
+    p.style.cssText = [
+      'left:'    + (Math.random()*100)                       + '%',
+      'width:'   + sz                                        + 'px',
+      'height:'  + sz                                        + 'px',
+      'background:'   + CCOLORS[i % CCOLORS.length],
+      'border-radius:'+ (Math.random()>.5?'50%':'2px'),
+      'animation-duration:'  + (2.2+Math.random()*2.5)      + 's',
+      'animation-delay:'     + (Math.random()*1.3)           + 's',
+      'transform:rotate('    + (Math.random()*360)           + 'deg)'
+    ].join(';');
+    box.appendChild(p);
+  }
+  setTimeout(() => box.innerHTML = '', 6500);
+}
+</script>
+</body>
+</html>
